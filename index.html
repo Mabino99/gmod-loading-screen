@@ -8,108 +8,242 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: url('background.jpg') no-repeat center center fixed;
+      background: url('background.png') no-repeat center center fixed;
       background-size: cover;
       color: white;
-      text-align: center;
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
       background-color: #111;
     }
 
     .box {
-      background: rgba(0,0,0,0.65);
-      padding: 30px;
+      width: min(720px, 92%);
+      background: rgba(0, 0, 0, 0.72);
       border-radius: 14px;
-      max-width: 700px;
-      width: 90%;
+      padding: 28px;
+      box-sizing: border-box;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
     }
 
     h1 {
-      margin-top: 0;
-      font-size: 42px;
+      margin: 0 0 10px 0;
+      font-size: 36px;
     }
 
     p {
-      font-size: 18px;
-      line-height: 1.5;
+      margin: 8px 0;
+      font-size: 16px;
     }
 
-    .links a {
-      color: #fff;
-      text-decoration: none;
-      margin: 0 10px;
+    .progress-wrap {
+      margin-top: 22px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      font-size: 14px;
+      opacity: 0.95;
+    }
+
+    .progress {
+      width: 100%;
+      height: 18px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #0063ae, #2ea3ff);
+      transition: width 0.2s ease;
+    }
+
+    .meta {
+      margin-top: 18px;
+      font-size: 14px;
+      opacity: 0.95;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .status {
+      margin-top: 18px;
+      font-size: 16px;
       font-weight: bold;
     }
 
-    .rules {
-      margin-top: 20px;
-      text-align: left;
-    }
-    
     .volume-control {
-      margin-top: 20px;
-      text-align: left;
+      margin-top: 22px;
     }
 
     .volume-control label {
       display: block;
       margin-bottom: 8px;
-      font-weight: bold;
+      font-size: 14px;
     }
 
     .volume-control input[type="range"] {
       width: 100%;
     }
+
+    .buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    button {
+      flex: 1;
+      padding: 10px 12px;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #0063ae;
+      color: white;
+      font-weight: bold;
+    }
+
+    .small {
+      margin-top: 12px;
+      font-size: 12px;
+      opacity: 0.75;
+    }
   </style>
 </head>
 <body>
-  
-  <audio id="bgmusic" autoplay loop>
-    <source src="musik.ogg" type="audio/ogg">
+
+  <audio id="bgmusic" loop>
+    <source src="spooky, Scary Skeletons.ogg" type="audio/ogg">
   </audio>
-  
+
   <div class="box">
-    <h1>Willkommen auf Mabinos TTT Server</h1>
-    <p>Assets werden geladen. Bitte einen Moment Geduld.</p>
+    <h1 id="servername">Mabinos TTT Server</h1>
+    <p id="welcome">Assets werden geladen…</p>
 
-    <div class="links">
-      <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=464374247" target="_blank">Workshop</a>
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="statusText">Verbindung wird vorbereitet…</span>
+        <span id="percentText">0%</span>
+      </div>
+
+      <div class="progress">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
     </div>
 
-    <div class="rules">
-      <h2>Regeln</h2>
-      <p>1. Kein RDM<br>
-         2. Kein Ghosting<br>
-         3. Respektvoll bleiben</p>
+    <div class="meta">
+      <div><strong>Map:</strong> <span id="mapname">-</span></div>
+      <div><strong>Gamemode:</strong> <span id="gamemode">-</span></div>
+      <div><strong>Datei:</strong> <span id="filename">-</span></div>
+      <div><strong>Fortschritt:</strong> <span id="filesProgress">0 / 0</span></div>
     </div>
+
+    <div class="status" id="joinStatus">Warte auf Status…</div>
 
     <div class="volume-control">
       <label for="volume">Musiklautstärke</label>
       <input type="range" id="volume" min="0" max="100" value="30">
-      <button id="muteBtn">Mute</button>
+      <div class="buttons">
+        <button id="muteBtn" type="button">Mute</button>
+        <button id="playBtn" type="button">Musik starten</button>
+      </div>
     </div>
-    
+
+    <div class="small">
+      Workshop- und Serverdaten werden live von Garry’s Mod an diese Seite übergeben.
+    </div>
   </div>
 
-<script>
-  const music = document.getElementById("bgmusic");
-  const volumeSlider = document.getElementById("volume");
-  const muteBtn = document.getElementById("muteBtn");
+  <script>
+    const music = document.getElementById("bgmusic");
+    const volumeSlider = document.getElementById("volume");
+    const muteBtn = document.getElementById("muteBtn");
+    const playBtn = document.getElementById("playBtn");
 
-  music.volume = volumeSlider.value / 100;
+    const progressBar = document.getElementById("progressBar");
+    const percentText = document.getElementById("percentText");
+    const statusText = document.getElementById("statusText");
+    const joinStatus = document.getElementById("joinStatus");
+    const filename = document.getElementById("filename");
+    const filesProgress = document.getElementById("filesProgress");
+    const servernameEl = document.getElementById("servername");
+    const mapnameEl = document.getElementById("mapname");
+    const gamemodeEl = document.getElementById("gamemode");
 
-  volumeSlider.addEventListener("input", function () {
-    music.volume = this.value / 100;
-  });
+    let totalFiles = 0;
+    let neededFiles = 0;
 
-  muteBtn.addEventListener("click", function () {
-    music.muted = !music.muted;
-    muteBtn.textContent = music.muted ? "Unmute" : "Mute";
-  });
-</script>
-  
+    music.volume = volumeSlider.value / 100;
+
+    volumeSlider.addEventListener("input", function () {
+      music.volume = this.value / 100;
+    });
+
+    muteBtn.addEventListener("click", function () {
+      music.muted = !music.muted;
+      muteBtn.textContent = music.muted ? "Unmute" : "Mute";
+    });
+
+    playBtn.addEventListener("click", function () {
+      music.play().catch(() => {});
+    });
+
+    function updateProgress() {
+      if (totalFiles <= 0) {
+        progressBar.style.width = "0%";
+        percentText.textContent = "0%";
+        filesProgress.textContent = "0 / 0";
+        return;
+      }
+
+      const downloaded = totalFiles - neededFiles;
+      const percent = Math.max(0, Math.min(100, (downloaded / totalFiles) * 100));
+
+      progressBar.style.width = percent + "%";
+      percentText.textContent = Math.round(percent) + "%";
+      filesProgress.textContent = downloaded + " / " + totalFiles;
+    }
+
+    window.GameDetails = function(servername, serverurl, mapname, maxplayers, steamid, gamemode, volume, language) {
+      servernameEl.textContent = servername || "TTT Server";
+      mapnameEl.textContent = mapname || "-";
+      gamemodeEl.textContent = gamemode || "-";
+
+      if (typeof volume === "number") {
+        music.volume = volume;
+        volumeSlider.value = Math.round(volume * 100);
+      }
+    };
+
+    window.SetFilesTotal = function(total) {
+      totalFiles = Number(total) || 0;
+      neededFiles = totalFiles;
+      statusText.textContent = "Dateiliste empfangen";
+      updateProgress();
+    };
+
+    window.SetFilesNeeded = function(needed) {
+      neededFiles = Number(needed) || 0;
+      updateProgress();
+    };
+
+    window.DownloadingFile = function(fileName) {
+      filename.textContent = fileName || "-";
+      statusText.textContent = "Datei wird geladen…";
+    };
+
+    window.SetStatusChanged = function(status) {
+      joinStatus.textContent = status || "Ladevorgang läuft…";
+      statusText.textContent = status || "Ladevorgang läuft…";
+    };
+  </script>
+
 </body>
 </html>
