@@ -52,8 +52,8 @@
 </head>
 <body>
   
-  <audio autoplay loop>
-  <source src="spooky, Scary Skeletons.ogg" type="audio/ogg">
+  <audio id="bgmusic" autoplay loop>
+    <source src="musik.ogg" type="audio/ogg">
   </audio>
   
   <div class="box">
@@ -71,6 +71,26 @@
          2. Kein Ghosting<br>
          3. Respektvoll bleiben</p>
     </div>
+
+    <div class="volume-control">
+      <label for="volume">Musiklautstärke</label>
+      <input type="range" id="volume" min="0" max="100" value="30">
+    </div>
+    
   </div>
+
+<script>
+  const music = document.getElementById("bgmusic");
+  const volumeSlider = document.getElementById("volume");
+
+  // Startlautstärke setzen
+  music.volume = volumeSlider.value / 100;
+
+  // Lautstärke bei Änderung anpassen
+  volumeSlider.addEventListener("input", function () {
+    music.volume = this.value / 100;
+  });
+</script>
+  
 </body>
 </html>
