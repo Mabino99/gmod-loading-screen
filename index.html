@@ -14,39 +14,43 @@
 
 * { box-sizing: border-box; }
 
-body {
+html, body {
   margin: 0;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   font-family: Arial, sans-serif;
   color: var(--text);
   overflow: hidden;
+  background: #0b0f14;
 }
 
-/* BACKGROUND */
 .bg {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  background: url('background.png') center / cover no-repeat;
-  transform: scale(1.02);
+  background-image: url("./background.png");
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  z-index: 0;
 }
 
-/* DUNKLES OVERLAY */
 .overlay {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(10,12,16,0.3) 0%,
-    rgba(10,12,16,0.6) 60%,
-    rgba(10,12,16,0.9) 100%
+    rgba(10,12,16,0.20) 0%,
+    rgba(10,12,16,0.45) 55%,
+    rgba(10,12,16,0.82) 100%
   );
+  z-index: 1;
 }
 
-/* TOP BAR */
 .top {
-  position: absolute;
+  position: fixed;
   top: 40px;
   left: 50px;
+  z-index: 2;
 }
 
 .top h1 {
@@ -60,18 +64,18 @@ body {
   font-size: 14px;
 }
 
-/* BOTTOM UI */
 .bottom {
-  position: absolute;
-  bottom: 40px;
+  position: fixed;
   left: 50px;
   right: 50px;
+  bottom: 40px;
+  z-index: 2;
 }
 
-/* PROGRESS */
 .progress-top {
   display: flex;
   justify-content: space-between;
+  gap: 16px;
   margin-bottom: 8px;
   font-size: 14px;
 }
@@ -90,7 +94,6 @@ body {
   transition: width 0.2s ease;
 }
 
-/* INFO */
 .info {
   margin-top: 15px;
   font-size: 13px;
@@ -100,55 +103,90 @@ body {
   flex-wrap: wrap;
 }
 
-/* AUDIO */
+.status {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
 .audio {
-  position: absolute;
-  bottom: 40px;
+  position: fixed;
   right: 50px;
-  width: 200px;
+  bottom: 95px;
+  width: 220px;
+  z-index: 2;
+}
+
+.audio label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: var(--muted);
 }
 
 input[type="range"] {
   width: 100%;
 }
 
+.buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 button {
-  margin-top: 6px;
-  width: 100%;
-  padding: 6px;
+  flex: 1;
+  padding: 8px 10px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: rgba(255,255,255,0.15);
   color: white;
   cursor: pointer;
 }
 
-/* STATUS */
-.status {
-  margin-top: 10px;
-  font-size: 14px;
+button:hover {
+  background: rgba(255,255,255,0.22);
+}
+
+@media (max-width: 700px) {
+  .top {
+    top: 20px;
+    left: 20px;
+  }
+
+  .bottom {
+    left: 20px;
+    right: 20px;
+    bottom: 20px;
+  }
+
+  .audio {
+    right: 20px;
+    bottom: 110px;
+    width: 180px;
+  }
+
+  .top h1 {
+    font-size: 30px;
+  }
 }
 </style>
 </head>
-
 <body>
 
 <div class="bg"></div>
 <div class="overlay"></div>
 
-<audio id="music" loop>
-  <source src="spooky-scary-skeletons.ogg" type="audio/ogg">
+<audio id="music" loop preload="auto">
+  <source src="./spooky-scary-skeletons.ogg" type="audio/ogg">
+  Dein Browser unterstützt kein Audio.
 </audio>
 
-<!-- TOP -->
 <div class="top">
   <h1 id="servername">TTT Server</h1>
   <div class="sub">Verbinde mit Server…</div>
 </div>
 
-<!-- BOTTOM -->
 <div class="bottom">
-
   <div class="progress-top">
     <span id="statusText">Initialisiere…</span>
     <span id="percent">0%</span>
@@ -166,14 +204,15 @@ button {
   </div>
 
   <div class="status" id="join">Warte auf Daten…</div>
-
 </div>
 
-<!-- AUDIO CONTROL -->
 <div class="audio">
+  <label for="volume">Musiklautstärke</label>
   <input type="range" id="volume" min="0" max="100" value="30">
-  <button onclick="startMusic()">Play</button>
-  <button onclick="toggleMute()">Mute</button>
+  <div class="buttons">
+    <button type="button" onclick="startMusic()">Play</button>
+    <button type="button" onclick="toggleMute()">Mute</button>
+  </div>
 </div>
 
 <script>
@@ -190,60 +229,74 @@ const join = document.getElementById("join");
 let total = 0;
 let needed = 0;
 
-/* AUDIO */
 music.volume = volume.value / 100;
 
-volume.oninput = () => {
+volume.addEventListener("input", () => {
   music.volume = volume.value / 100;
-};
+});
 
 function startMusic() {
-  music.play().catch(()=>{});
+  music.play().then(() => {
+    console.log("Musik gestartet");
+  }).catch((err) => {
+    console.log("Audio konnte nicht gestartet werden:", err);
+  });
 }
 
 function toggleMute() {
   music.muted = !music.muted;
 }
 
-/* PROGRESS */
 function update() {
-  if (total === 0) return;
+  if (total === 0) {
+    bar.style.width = "0%";
+    percent.textContent = "0%";
+    files.textContent = "0 / 0";
+    return;
+  }
 
-  let done = total - needed;
-  let p = (done / total) * 100;
+  const done = total - needed;
+  const p = (done / total) * 100;
 
   bar.style.width = p + "%";
   percent.textContent = Math.round(p) + "%";
   files.textContent = done + " / " + total;
 }
 
-/* GMod Hooks */
 window.GameDetails = function(name, url, map, max, steamid, mode) {
-  document.getElementById("servername").textContent = name;
-  document.getElementById("map").textContent = map;
-  document.getElementById("mode").textContent = mode;
+  document.getElementById("servername").textContent = name || "TTT Server";
+  document.getElementById("map").textContent = map || "-";
+  document.getElementById("mode").textContent = mode || "-";
 };
 
 window.SetFilesTotal = function(t) {
-  total = t;
-  needed = t;
+  total = Number(t) || 0;
+  needed = total;
   update();
 };
 
 window.SetFilesNeeded = function(n) {
-  needed = n;
+  needed = Number(n) || 0;
   update();
 };
 
 window.DownloadingFile = function(f) {
-  file.textContent = f;
+  file.textContent = f || "-";
   statusText.textContent = "Lade Datei…";
 };
 
 window.SetStatusChanged = function(s) {
-  join.textContent = s;
-  statusText.textContent = s;
+  join.textContent = s || "Ladevorgang läuft…";
+  statusText.textContent = s || "Ladevorgang läuft…";
 };
+
+/* Browser-Test:
+   Klick irgendwo auf die Seite, um Musik testweise zu starten */
+document.addEventListener("click", () => {
+  if (music.paused) {
+    music.play().catch(() => {});
+  }
+}, { once: true });
 </script>
 
 </body>
