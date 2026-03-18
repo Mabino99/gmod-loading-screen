@@ -27,7 +27,7 @@ html, body {
 .bg {
   position: fixed;
   inset: 0;
-  background-image: url("./background.png");
+  background-image: url("https://mabino99.github.io/gmod-loading-screen/background.png");
   background-position: center center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -39,7 +39,7 @@ html, body {
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(10,12,16,0.20) 0%,
+    rgba(10,12,16,0.15) 0%,
     rgba(10,12,16,0.45) 55%,
     rgba(10,12,16,0.82) 100%
   );
@@ -177,8 +177,7 @@ button:hover {
 <div class="overlay"></div>
 
 <audio id="music" loop preload="auto">
-  <source src="./spooky-scary-skeletons.ogg" type="audio/ogg">
-  Dein Browser unterstützt kein Audio.
+  <source src="https://mabino99.github.io/gmod-loading-screen/spooky-scary-skeletons.ogg" type="audio/ogg">
 </audio>
 
 <div class="top">
@@ -236,9 +235,7 @@ volume.addEventListener("input", () => {
 });
 
 function startMusic() {
-  music.play().then(() => {
-    console.log("Musik gestartet");
-  }).catch((err) => {
+  music.play().catch((err) => {
     console.log("Audio konnte nicht gestartet werden:", err);
   });
 }
@@ -289,14 +286,6 @@ window.SetStatusChanged = function(s) {
   join.textContent = s || "Ladevorgang läuft…";
   statusText.textContent = s || "Ladevorgang läuft…";
 };
-
-/* Browser-Test:
-   Klick irgendwo auf die Seite, um Musik testweise zu starten */
-document.addEventListener("click", () => {
-  if (music.paused) {
-    music.play().catch(() => {});
-  }
-}, { once: true });
 </script>
 
 </body>
