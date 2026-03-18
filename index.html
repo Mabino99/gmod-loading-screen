@@ -90,6 +90,7 @@
     <div class="volume-control">
       <label for="volume">Musiklautstärke</label>
       <input type="range" id="volume" min="0" max="100" value="30">
+      <button id="muteBtn">Mute</button>
     </div>
     
   </div>
@@ -97,13 +98,17 @@
 <script>
   const music = document.getElementById("bgmusic");
   const volumeSlider = document.getElementById("volume");
+  const muteBtn = document.getElementById("muteBtn");
 
-  // Startlautstärke setzen
   music.volume = volumeSlider.value / 100;
 
-  // Lautstärke bei Änderung anpassen
   volumeSlider.addEventListener("input", function () {
     music.volume = this.value / 100;
+  });
+
+  muteBtn.addEventListener("click", function () {
+    music.muted = !music.muted;
+    muteBtn.textContent = music.muted ? "Unmute" : "Mute";
   });
 </script>
   
